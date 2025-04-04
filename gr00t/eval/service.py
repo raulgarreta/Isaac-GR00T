@@ -19,6 +19,7 @@ from typing import Any, Callable, Dict
 
 import torch
 import zmq
+import time
 
 
 class TorchSerializer:
@@ -94,11 +95,15 @@ class BaseInferenceServer:
                     raise ValueError(f"Unknown endpoint: {endpoint}")
 
                 handler = self._endpoints[endpoint]
+
+                print("Action inferring...")
+                start_time = time.time()
                 result = (
                     handler.handler(request.get("data", {}))
                     if handler.requires_input
                     else handler.handler()
                 )
+                print("Action inferring time taken", time.time() - start_time)
                 self.socket.send(TorchSerializer.to_bytes(result))
             except Exception as e:
                 print(f"Error in server: {e}")
