@@ -20,6 +20,7 @@ from typing import Any, Dict, Optional, Union
 
 import numpy as np
 import torch
+import cv2
 from huggingface_hub import snapshot_download
 from huggingface_hub.errors import HFValidationError, RepositoryNotFoundError
 
@@ -164,6 +165,18 @@ class Gr00tPolicy(BasePolicy):
             Dict[str, Any]: The predicted action.
         """
         # let the get_action handles both batch and single input
+
+        # uncompress video frames
+        for key, value in observations.items():
+            if key.startswith("video."):
+                # Decode JPEG images
+                frame1 = cv2.imdecode(
+                    np.frombuffer(value, dtype=np.uint8),
+                    cv2.IMREAD_COLOR
+                )
+                observations[key] = frame1[np.newaxis, :, :, :]
+
+        # Check if the input is batched
         is_batch = self._check_state_is_batched(observations)
         if not is_batch:
             observations = unsqueeze_dict_values(observations)

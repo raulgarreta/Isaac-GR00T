@@ -20,6 +20,7 @@ from typing import Any, Callable, Dict
 import torch
 import zmq
 import time
+import msgpack
 
 
 class TorchSerializer:
@@ -88,7 +89,8 @@ class BaseInferenceServer:
         while self.running:
             try:
                 message = self.socket.recv()
-                request = TorchSerializer.from_bytes(message)
+                # request = TorchSerializer.from_bytes(message)
+                request = msgpack.unpackb(message)
                 endpoint = request.get("endpoint", "get_action")
 
                 if endpoint not in self._endpoints:
@@ -104,7 +106,8 @@ class BaseInferenceServer:
                     else handler.handler()
                 )
                 print("Action inferring time taken", time.time() - start_time)
-                self.socket.send(TorchSerializer.to_bytes(result))
+                #self.socket.send(TorchSerializer.to_bytes(result))
+                self.socket.send(msgpack.packb(result))
             except Exception as e:
                 print(f"Error in server: {e}")
                 import traceback
@@ -155,11 +158,16 @@ class BaseInferenceClient:
         if requires_input:
             request["data"] = data
 
-        self.socket.send(TorchSerializer.to_bytes(request))
+
+        #self.socket.send(TorchSerializer.to_bytes(request))
+        self.socket.send(msgpack.packb(request))
+
+        
         message = self.socket.recv()
         if message == b"ERROR":
             raise RuntimeError("Server error")
-        return TorchSerializer.from_bytes(message)
+        # return TorchSerializer.from_bytes(message)
+        return msgpack.unpackb(message)
 
     def __del__(self):
         """Cleanup resources on destruction"""
