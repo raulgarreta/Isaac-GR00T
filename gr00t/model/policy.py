@@ -178,7 +178,7 @@ class Gr00tPolicy(BasePolicy):
 
 
         observations["state.single_arm"] =  np.array(observations["state.single_arm"])[np.newaxis, :].astype(np.float64),
-        observations["state.gripper"] = np.array(observations["state.gripper"])[5:6][np.newaxis, :].astype(np.float64),
+        observations["state.gripper"] = np.array(observations["state.gripper"])[np.newaxis, :].astype(np.float64),
 
         print("observations", observations)
 
