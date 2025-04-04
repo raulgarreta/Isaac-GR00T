@@ -176,6 +176,10 @@ class Gr00tPolicy(BasePolicy):
                 )
                 observations[key] = frame1[np.newaxis, :, :, :]
 
+
+        observations["state.single_arm"] =  np.array(observations["state.single_arm"])[np.newaxis, :].astype(np.float64),
+        observations["state.gripper"] = observations["state.gripper"].numpy()[5:6][np.newaxis, :].astype(np.float64),
+
         # Check if the input is batched
         is_batch = self._check_state_is_batched(observations)
         if not is_batch:

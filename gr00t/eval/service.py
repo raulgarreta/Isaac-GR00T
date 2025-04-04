@@ -158,6 +158,7 @@ class BaseInferenceClient:
         if requires_input:
             request["data"] = data
 
+        print(request)
 
         #self.socket.send(TorchSerializer.to_bytes(request))
         self.socket.send(msgpack.packb(request))
